@@ -21,15 +21,21 @@ console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(formatter)
 
-# Файл - WARNING и выше
-file_handler = logging.FileHandler('bot.log', encoding='utf-8')
-file_handler.setLevel(logging.WARNING)
-file_handler.setFormatter(formatter)
+# Файл - WARNING и выше (только если не в Docker)
+import os
+handlers = [console_handler]
+
+# В Docker логируем только в stdout, файловое логирование отключаем
+if not os.path.exists('/.dockerenv'):
+    file_handler = logging.FileHandler('bot.log', encoding='utf-8')
+    file_handler.setLevel(logging.WARNING)
+    file_handler.setFormatter(formatter)
+    handlers.append(file_handler)
 
 # Настраиваем root logger
 logging.basicConfig(
     level=logging.INFO,  # Минимальный уровень для всех хендлеров
-    handlers=[console_handler, file_handler]
+    handlers=handlers
 )
 
 logger = logging.getLogger(__name__)

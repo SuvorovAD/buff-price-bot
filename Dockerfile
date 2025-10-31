@@ -13,14 +13,16 @@ ENV PYTHONUNBUFFERED=1 \
 # Копируем файл с зависимостями
 COPY requirements.txt .
 
+# Устанавливаем git для клонирования submodule
+RUN apt-get update && apt-get install -y git && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем локальную библиотеку buff163-unofficial-api
-COPY buff163-unofficial-api /tmp/buff163-unofficial-api
-
-# Устанавливаем buff163-unofficial-api из локальной директории
-RUN pip install --no-cache-dir /tmp/buff163-unofficial-api
+# Клонируем и устанавливаем buff163-unofficial-api из репозитория
+RUN git clone https://github.com/markzhdan/buff163-unofficial-api.git /tmp/buff163-unofficial-api && \
+    pip install --no-cache-dir /tmp/buff163-unofficial-api && \
+    rm -rf /tmp/buff163-unofficial-api
 
 # Копируем весь проект
 COPY . .
