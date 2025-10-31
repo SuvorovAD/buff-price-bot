@@ -1,0 +1,73 @@
+version: '3.8'
+
+# Production конфигурация для Docker Compose
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: buff-price-bot:latest
+    container_name: buff-price-bot-prod
+    restart: always
+    
+    # Переменные окружения
+    env_file:
+      - .env
+    
+    # Тома для данных
+    volumes:
+      - bot-data:/app/data
+      - bot-logs:/app/logs
+    
+    # Ограничения ресурсов
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+      
+      # Политика перезапуска
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 180s
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+    
+    # Безопасность
+    security_opt:
+      - no-new-privileges:true
+    
+    # Сеть
+    networks:
+      - bot-network
+
+networks:
+  bot-network:
+    driver: bridge
+
+volumes:
+  bot-data:
+    driver: local
+  bot-logs:
+    driver: local
+

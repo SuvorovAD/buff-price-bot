@@ -1,0 +1,3 @@
+[submodule "buff163-unofficial-api"]
+	path = buff163-unofficial-api
+	url = https://github.com/markzhdan/buff163-unofficial-api.git

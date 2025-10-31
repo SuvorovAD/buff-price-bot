@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: buff-price-bot
+    restart: unless-stopped
+    
+    # Переменные окружения из файла .env
+    env_file:
+      - .env
+    
+    # Монтируем том для базы данных
+    volumes:
+      - ./data:/app/data
+      - ./bot.log:/app/bot.log
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Политика перезапуска
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+volumes:
+  data:
+    driver: local
+
